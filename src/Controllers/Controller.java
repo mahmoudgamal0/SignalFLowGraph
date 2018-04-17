@@ -1,18 +1,23 @@
 package Controllers;
 
+import Models.Drawer;
 import Models.Shapes.Circle;
-import Models.Shape;
+import Models.IShape;
 import Models.Shapes.Edge;
+import Models.Utilities;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import javafx.animation.Animation;
 import javafx.animation.Transition;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.shape.CubicCurve;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -29,11 +34,13 @@ public class Controller{
     @FXML
     private JFXListView<JFXButton> listView;
     @FXML
-    private Canvas canvas;
+    private Pane pane;
 
-    private ArrayList<Shape> drawnCircles;
+    private Drawer drawer;
+    private ArrayList<IShape> drawnCircles;
+    private ArrayList<IShape> drawnEdges;
 
-    private Shape selectedShape;
+    private IShape selectedIShape;
     private String mode;
     private boolean firstPointSet;
     private Point firstPoint;
@@ -54,7 +61,9 @@ public class Controller{
         this.removeEdge = new JFXButton("Remove Edge");
         this.calculate = new JFXButton("Calculate");
 
+        this.drawnEdges = new ArrayList<>();
         this.drawnCircles = new ArrayList<>();
+        this.drawer = new Drawer(this.drawnCircles,this.drawnEdges);
     }
 
 
@@ -62,26 +71,33 @@ public class Controller{
     public void initialize() {
         initButtons();
         initListView();
-
-        CubicCurve cc = new CubicCurve();
-
     }
 
     private void initButtons() {
         this.addNode.setOnAction(e->{
-            this.selectedShape = new Circle();
+            this.selectedIShape = new Circle();
+            this.drawer.setShape(this.selectedIShape);
             this.mode = "add";
         });
 
         this.addEdge.setOnAction(e->{
-            this.selectedShape = new Edge();
+            this.selectedIShape = new Edge();
+            this.drawer.setShape(this.selectedIShape);
             this.mode = "add";
         });
 
         this.deleteNode.setOnAction(e->{
-            this.selectedShape = new Circle();
+            this.selectedIShape = new Circle();
+            this.drawer.setShape(this.selectedIShape);
             this.mode = "remove";
         });
+
+        this.removeEdge.setOnAction(e->{
+            this.selectedIShape = new Edge();
+            this.drawer.setShape(this.selectedIShape);
+            this.mode = "remove";
+        });
+
     }
 
     private void initListView() {
@@ -116,23 +132,38 @@ public class Controller{
     }
 
     @FXML
-    public void cursor(MouseEvent event){
-
-        if(this.selectedShape == null)
+    public void drawEdges(MouseEvent event)
+    {
+        if(this.selectedIShape == null || this.selectedIShape instanceof Circle)
             return;
 
         if(this.mode.equals("add"))
+            this.drawer.drag(this.pane,event);
+        else
         {
-            this.selectedShape.setProperties(setShapeProperties(event));
-            if(!this.firstPointSet)
-                this.selectedShape.draw(this.canvas.getGraphicsContext2D());
-            this.drawnCircles.add(this.selectedShape.clone());
+            if(this.drawnEdges.size() == 0)
+                throw new RuntimeException("Display an error message of no nodes");
+            for(int i = 0 ; i < this.drawnEdges.size() ; i++){
+                if(((Edge)this.drawnEdges.get(i)).contains(new Point2D(event.getX(),event.getY())))
+                    this.drawer.remove(this.pane,i);
+            }
         }
+    }
+
+    @FXML
+    public void drawNodes(MouseEvent event){
+
+        if(this.selectedIShape == null || this.selectedIShape instanceof Edge)
+            return;
+
+        if(this.mode.equals("add"))
+            this.drawer.draw(this.pane,event);
         else
         {
             int i = 0;
             try{
-                i = getNearest(event);
+                Point point = new Point((int) event.getX(),(int)event.getY());
+                i = Utilities.getNearest(this.drawnCircles,point);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
             }
@@ -140,94 +171,10 @@ public class Controller{
                 System.out.println("Error message");
             else
             {
-                this.drawnCircles.remove(i);
-                redraw();
+                this.drawer.remove(this.pane,i);
             }
         }
 
-    }
-
-    private void redraw() {
-        this.canvas.getGraphicsContext2D().clearRect(0,0,this.canvas.getWidth(),this.canvas.getHeight());
-        for(int i = 0 ; i < this.drawnCircles.size(); i++)
-            this.drawnCircles.get(i).draw(this.canvas.getGraphicsContext2D());
-    }
-
-    private int getNearest(MouseEvent event) {
-
-        Point point = new Point((int)event.getX(),(int)event.getY());
-        if(this.drawnCircles.size() == 0)
-            throw new RuntimeException("Display an error message of no nodes");
-        int minX = this.drawnCircles.get(0).getProperties().get("X");
-        int minY = this.drawnCircles.get(0).getProperties().get("Y");
-        int minProp = 0;
-        for(int i = 1 ; i < this.drawnCircles.size() ; i++)
-        {
-            int x = this.drawnCircles.get(i).getProperties().get("X");
-            int y = this.drawnCircles.get(i).getProperties().get("Y");
-            if(isNearest(point,minX,minY,x,y))
-            {
-                minX = x;
-                minY = y;
-                minProp = i;
-            }
-        }
-
-        if(contains(point,this.drawnCircles.get(minProp).getProperties()))
-            return minProp;
-        return -1;
-    }
-
-    private boolean contains(Point point, Map<String, Integer> properties) {
-        int r = properties.get("R") / 2;
-        int x = properties.get("X");
-        int y = properties.get("Y");
-
-        if(point.x > (x-r) && point.x < (x+r))
-            if(point.y > (y-r) && point.y < (y+r))
-                return true;
-        return false;
-    }
-
-    private boolean isNearest(Point point, int minX, int minY, int x, int y) {
-        int diffX = Math.abs(x - point.x);
-        int diffXMin = Math.abs(minX - point.x);
-
-        if(diffXMin > diffX)
-            return true;
-
-        int diffY = Math.abs(y - point.y);
-        int diffYMin = Math.abs(minY - point.y);
-        if(diffYMin > diffY)
-            return true;
-        return false;
-    }
-
-
-    private Map<String,Integer> setShapeProperties(MouseEvent event) {
-
-        Map<String,Integer> properties = new HashMap<>();
-        if(this.selectedShape instanceof Circle)
-        {
-            properties.put("X",(int)event.getX());
-            properties.put("Y",(int)event.getY());
-            properties.put("R",30);
-        }
-        else
-        {
-            if(!firstPointSet)
-            {
-                this.firstPoint = new Point((int)event.getX(),(int)event.getY());
-                firstPointSet = true;
-                return properties;
-            }
-            properties.put("X1",this.firstPoint.x);
-            properties.put("Y1",this.firstPoint.y);
-            properties.put("X2",(int)event.getX());
-            properties.put("Y2", (int) event.getY());
-        }
-        this.firstPointSet = false;
-        return properties;
     }
 
     private Animation hideSwapPane() {

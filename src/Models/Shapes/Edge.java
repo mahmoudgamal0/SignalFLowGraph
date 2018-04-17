@@ -1,73 +1,87 @@
 package Models.Shapes;
 
-import Models.Shape;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
+import Models.IShape;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Paint;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Edge extends Shape{
+public class Edge extends javafx.scene.shape.SVGPath implements IShape {
 
-    private Map<String, Integer> properties;
+    private Map<String, Integer> propertiesMap;
+    private ArrayList<IShape> connectedNodes;
+    private String bx;
+    private String by;
+    private int sx;
+    private int sy;
 
     public Edge(){
-        this.properties = new HashMap<>();
-        this.properties.put("Gain",0);
-        this.properties.put("X",0);
-        this.properties.put("Y",0);
-        this.properties.put("X2",0);
-        this.properties.put("Y2",0);
+        super();
+        this.propertiesMap = new HashMap<>();
+        this.connectedNodes = new ArrayList<>();
+        setStroke(Paint.valueOf("CYAN"));
+        setFill(Paint.valueOf("Transparent"));
+        setStrokeWidth(3);
     }
 
     @Override
     public void setProperties(Map<String, Integer> properties) {
-        this.properties = properties;
+        this.propertiesMap = properties;
+        this.sx = this.propertiesMap.get("sx");
+        this.bx = Integer.toString(this.sx);
+        this.sy = this.propertiesMap.get("sy");
+        this.by = Integer.toString( this.sy + 50);
     }
 
     @Override
-    public Map<String, Integer> getProperties() {
-        return this.properties;
+    public Map<String, Integer> getPropertiesMap() {
+        return this.propertiesMap;
     }
 
     @Override
-    public Shape clone(){
-        Shape e = new Edge();
+    public void init(MouseEvent event) {
+        int x = (int)event.getX();
+        int y = (int)event.getY();
+        String ex = Integer.toString(x);
+        String ey = Integer.toString(y + 50);
+        String path = "M " + this.sx + "," + this.sy + " ";
+        path += "C " + this.bx + "," + this.by + " " + ex + "," + ey + " " + ex + "," + Integer.toString(y);
+
+        this.propertiesMap.put("fx",x);
+        this.propertiesMap.put("fy",y);
+        setContent(path);
+    }
+
+    public void refresh()
+    {
+        String ex = Integer.toString(this.propertiesMap.get("fx"));
+        String ey = Integer.toString(this.propertiesMap.get("fy") + 50);
+        String path = "M " + this.sx + "," + this.sy + " ";
+        path += "C " + this.bx + "," + this.by + " " + ex + "," + ey + " " + ex + "," + Integer.toString(this.propertiesMap.get("fy"));
+
+        setContent(path);
+    }
+    @Override
+    public void addConnectedShape(IShape shape) {
+        this.connectedNodes.add(shape);
+    }
+
+    @Override
+    public ArrayList<IShape> getConnectedShapes() {
+        return this.connectedNodes;
+    }
+
+    @Override
+    public IShape clone(){
+        IShape e = new Edge();
         Map<String, Integer> prop = new HashMap<>();
-        prop.put("X1",this.properties.get("X"));
-        prop.put("Y1",this.properties.get("Y"));
+        prop.put("sx",propertiesMap.get("sx"));
+        prop.put("sy",propertiesMap.get("sy"));
+        prop.put("fx",propertiesMap.get("fx"));
+        prop.put("fy",propertiesMap.get("fy"));
         e.setProperties(prop);
         return e;
-    }
-
-    @Override
-    public void draw(GraphicsContext gc) {
-        int x1 = this.properties.get("X1");
-        int y1 = this.properties.get("Y1");
-        int x2 = this.properties.get("X2");
-        int y2 = this.properties.get("Y2");
-        int r = (int)Math.sqrt(Math.pow(x2-x1,2) + Math.pow(y2-y1,2))/ 2;
-
-        double theta = Math.atan((double)(y1-y2)/(x2-x1));
-        double phi = Math.atan((double)2 * Math.sin(theta) / Math.cos(theta))*180 / Math.PI;
-        int h = 2 * (int) Math.abs(2*r*Math.sin(theta)) ;
-        int w = 2 * (int)Math.abs(2*r*Math.cos(theta));
-
-        gc.setFill(Color.BLACK);
-        if(x2 > x1)
-        {
-            if(y1 > y2)
-                gc.strokeArc(x1, y1 -(h/2), w, h, 90,90 , ArcType.OPEN);
-            else
-                gc.strokeArc(x1, y1 -(h/2), w, h, -90,-90 , ArcType.OPEN);
-        }
-        else
-        {
-            if(y2 > y1)
-                gc.strokeArc(x2, y2 -(h/2), w, h, 90,90 , ArcType.OPEN);
-            else
-                gc.strokeArc(x2, y2 -(h/2), w, h, -90,-90 , ArcType.OPEN);
-        }
     }
 }
