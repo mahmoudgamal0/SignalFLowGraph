@@ -1,0 +1,24 @@
+.split-pane *.split-pane-divider{
+    -fx-background-image: url("../Images/back.png");
+    -fx-pref-width: 16px;
+    -fx-background-size: 16px;
+    -fx-background-repeat: no-repeat;
+    -fx-background-color: transparent;
+    -fx-background-position: 90%;
+}
+
+.jfx-list-cell:selected {
+    -fx-background-color: red;
+}
+
+.jfx-list-cell {
+    -fx-background-insets: 0.0;
+}
+
+.jfx-list-cell .jfx-list-rippler{
+    -fx-rippler-fill: blue;
+}
+
+.jfx-list-cell:hover {
+    -fx-background-color: green;
+}
