@@ -6,5 +6,6 @@ public class Path {
 
 
     ArrayList<Vertex> vertices = new ArrayList<>();
+    String gain = "";
 
 }

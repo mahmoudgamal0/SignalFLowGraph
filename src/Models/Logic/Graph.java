@@ -40,6 +40,7 @@ public class Graph {
     ArrayList<Vertex> current ;
     ArrayList<Path> paths ;
     ArrayList<Loop> loops ;
+    ArrayList<String> gains ;
     HashMap<String,Integer> visited;
     HashMap<String,Integer> found;
 
@@ -47,8 +48,10 @@ public class Graph {
         current = new ArrayList<>();
         loops = new ArrayList<>();
         visited = new HashMap<>();
+        gains = new ArrayList<>();
         found = new HashMap<>();
         findLoops(vertices.get(0));
+
         return loops;
     }
     private void findLoops(Vertex v){
@@ -56,11 +59,17 @@ public class Graph {
         if(visited.containsKey(v.name)) {
             int index = current.indexOf(v);
             ArrayList<Vertex> tmp = new ArrayList<>();
+            String tmpGain = "";
             Loop l = new Loop();
             for (int i = index; i < current.size();i++) {
                 tmp.add(current.get(i));
                 l.verticesName.put(current.get(i).name,0);
             }
+            for (int i = index; i < gains.size() - 1;i++) {
+                tmpGain +=  gains.get(i) +" * " ;
+            }
+            tmpGain +=  gains.get(current.size() - 1);
+            l.gain = tmpGain;
             l.vertices = tmp;
             boolean loopClear = false;
             boolean allClear = true;
@@ -84,15 +93,19 @@ public class Graph {
         current.add(v);
         visited.put(v.name,0);
         for(Edge e : v.edges) {
+            gains.add(e.weight);
             findLoops(e.destination);
+            gains.remove(e.weight);
         }
         visited.remove(v.name);
         current.remove(v);
     }
 
+    int initialIndex;
     public ArrayList<Path> getForwardPaths(String v,String u) {
         current = new ArrayList<>();
         paths = new ArrayList<>();
+        gains = new ArrayList<>();
         visited = new HashMap<>();
         getForwardPaths(getVertex(v),getVertex(u));
         return paths;
@@ -102,8 +115,17 @@ public class Graph {
         if(v.equals(u)) {
             current.add(v);
             ArrayList<Vertex> tmp = (ArrayList<Vertex>) current.clone();
+            String tmpGain = "";
+
+
+            for (int i = 0; i < gains.size() - 1;i++) {
+                tmpGain +=  gains.get(i) +" * " ;
+            }
+            tmpGain +=  gains.get(gains.size() - 1);
+
             Path path = new Path();
             path.vertices = tmp;
+            path.gain = tmpGain;
             paths.add(path);
             current.remove(v);
         } else if(v.edges.isEmpty()) {
@@ -112,8 +134,11 @@ public class Graph {
         current.add(v);
         visited.put(v.name,0);
         for(Edge e : v.edges) {
-            if(!visited.containsKey(e.destination.name))
-                getForwardPaths(e.destination,u);
+            if(!visited.containsKey(e.destination.name)) {
+                gains.add(e.weight);
+                getForwardPaths(e.destination, u);
+                gains.remove(e.weight);
+            }
         }
         visited.remove(v.name);
         current.remove(v);
