@@ -1,6 +1,7 @@
 package Models.Shapes;
 
 import Models.IShape;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 
@@ -10,30 +11,32 @@ import java.util.Map;
 
 public class Circle extends javafx.scene.shape.Circle implements IShape {
 
-    private Map<String, Integer> propertiesMap;
+    private Map<String, Object> propertiesMap;
     private ArrayList<IShape> connectedEdges;
+    private Label label;
 
     public Circle(){
         super();
         this.propertiesMap = new HashMap<>();
         this.connectedEdges = new ArrayList<>();
         setStroke(Paint.valueOf("RED"));
-        setFill(Paint.valueOf("WHITE"));
+        setFill(Paint.valueOf("TRANSPARENT"));
+        setAccessibleText("hi");
         setRadius(15.0);
     }
 
     @Override
-    public void setProperties(Map<String, Integer> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.propertiesMap = properties;
     }
 
     @Override
-    public Map<String, Integer> getPropertiesMap() {
+    public Map<String, Object> getPropertiesMap() {
         return this.propertiesMap;
     }
 
     @Override
-    public void init(MouseEvent event) {
+    public void init(MouseEvent event) { // Not used in here
         setLayoutX(event.getX());
         setLayoutY(event.getY());
     }
@@ -48,13 +51,15 @@ public class Circle extends javafx.scene.shape.Circle implements IShape {
         return this.connectedEdges;
     }
 
+    @Override
+    public void setLabel(Label label) {
+        this.label = label;
+        label.setLayoutX(this.getLayoutX() - this.getRadius()/2);
+        label.setLayoutY(this.getLayoutY() - this.getRadius()/2);
+    }
 
     @Override
-    public IShape clone(){
-        IShape c = new Circle();
-        Map<String, Integer> prop = new HashMap<>();
-
-        c.setProperties(prop);
-        return c;
+    public Label getLabel() {
+        return this.label;
     }
 }
