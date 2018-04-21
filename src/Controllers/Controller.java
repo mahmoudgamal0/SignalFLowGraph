@@ -1,11 +1,8 @@
 package Controllers;
 
-import Models.Drawer;
+import Models.*;
 import Models.Logic.Graph;
-import Models.SFG;
-import Models.ShapeTracker;
 import Models.Shapes.Circle;
-import Models.IShape;
 import Models.Shapes.Edge;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
@@ -14,6 +11,7 @@ import javafx.animation.Transition;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
@@ -143,9 +141,21 @@ public class Controller{
             return;
 
         if(this.mode.equals("add"))
-            this.drawer.drag(this.pane,event,new Edge());
+        {
+            try{
+                this.drawer.drag(this.pane,event,new Edge());
+            } catch (RuntimeException e){
+                AlertBox.alert("Edge Warning",e.getMessage());
+            }
+        }
         else
-            this.drawer.removeEdge(pane,event);
+        {
+            try {
+                this.drawer.removeEdge(pane,event);
+            } catch (RuntimeException e) {
+                AlertBox.alert("Edge Warning",e.getMessage());
+            }
+        }
     }
 
     @FXML
@@ -157,7 +167,13 @@ public class Controller{
         if(this.mode.equals("add"))
             this.drawer.drawNode(this.pane,new Circle());
         else
-            this.drawer.removeNode(pane,event);
+        {
+            try{
+                this.drawer.removeNode(pane,event);
+            } catch (RuntimeException e) {
+                AlertBox.alert("Node warning",e.getMessage());
+            }
+        }
     }
 
     @FXML
@@ -167,7 +183,7 @@ public class Controller{
 
         for(IShape edge : drawnEdges) {
 
-            if(((Edge)edge).contains(new Point2D(event.getX(),event.getY()))){
+            if(((Edge)edge).getBoundsInParent().contains(new Point2D(event.getX(),event.getY()))){
                 Label label = edge.getLabel();
                 TextField text = new TextField(label.getText());
                 text.setLayoutX(label.getLayoutX());
@@ -195,12 +211,15 @@ public class Controller{
         SFG sfg = new SFG(this.drawnNodes,this.drawnEdges);
         sfg.assembleGraph();
 
-        /*
-        * assemble graph
-        * pass instance
-        * get result
-        * display it
-        */
+        ArrayList<String> loops = sfg.getLoops();
+        ArrayList<String> paths = sfg.getForwardPaths();
+
+        String result = "";
+        for(int i = 0 ; i < paths.size() ; i++)
+            result += paths.get(i);
+
+        AlertBox.alert("gain",result);
+
     }
 
     private Animation hideSwapPane() {

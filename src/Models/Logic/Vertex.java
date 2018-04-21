@@ -6,6 +6,6 @@ public class Vertex {
 
 
     int order;
-    String name;
+    public String name;
     ArrayList<Edge> edges = new ArrayList<>();
 }

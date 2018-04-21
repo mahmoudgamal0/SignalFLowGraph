@@ -1,18 +1,18 @@
 package Models.Shapes;
 
 import Models.IShape;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.CubicCurve;
-import javafx.scene.shape.CubicCurveTo;
-import javafx.scene.shape.Path;
+import javafx.scene.shape.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Edge extends javafx.scene.shape.CubicCurve implements IShape {
+public class Edge extends javafx.scene.shape.SVGPath implements IShape {
 
     private Map<String, Object> propertiesMap;
     private ArrayList<IShape> connectedNodes;
@@ -31,8 +31,10 @@ public class Edge extends javafx.scene.shape.CubicCurve implements IShape {
         this.propertiesMap.put("gain"," ");
         this.connectedNodes = new ArrayList<>();
         setStroke(Paint.valueOf("CYAN"));
-        setFill(Paint.valueOf("Transparent"));
+        setFill(Paint.valueOf("TRANSPARENT"));
         setStrokeWidth(3);
+        setPickOnBounds(false);
+
     }
 
     @Override
@@ -67,28 +69,38 @@ public class Edge extends javafx.scene.shape.CubicCurve implements IShape {
 
     private void drawCurve(int x , int y)
     {
-       setStartX(sx);
-       setStartY(sy);
-       setEndX(x);
-       setEndY(y);
 
-       double r = Math.sqrt(Math.pow(sx-x,2))/2;
-       if(x > sx)
-       {
-           setControlX1(sx + r/2);
-           setControlY1(sy - r);
-           setControlX2(x - r/2);
-           setControlY2(sy - r);
-           propertiesMap.put("type",1);
-       }
-       else
-       {
-           setControlX1(sx - r/2);
-           setControlY1(sy + r);
-           setControlX2(x + r/2);
-           setControlY2(sy + r);
-           propertiesMap.put("type",0);
-       }
+        String startX = Integer.toString(sx);
+        String startY = Integer.toString(sy);
+        String finishX = Integer.toString(x);
+        String finishY = Integer.toString(y);
+        String controlX1;
+        String controlY1;
+        String controlX2;
+        String controlY2;
+
+        double r = Math.sqrt(Math.pow(sx-x,2))/2;
+        if(x > sx)
+        {
+            controlX1 =Integer.toString((int) (sx + r/2));
+            controlY1 = Integer.toString((int) (sy - r));
+            controlX2 = Integer.toString((int) (x - r/2));
+            controlY2 = Integer.toString((int) (sy - r));
+            propertiesMap.put("type",1);
+        }
+        else
+        {
+            controlX1 = Integer.toString((int) (sx - r/2));
+            controlY1 = Integer.toString((int) (sy + r));
+            controlX2 = Integer.toString((int) (x + r/2));
+            controlY2 = Integer.toString((int) (sy + r));
+            propertiesMap.put("type",0);
+        }
+
+        String path = "M " + startX + "," + startY +" ";
+        path+= "C " + controlX1 + "," + controlY1 + " " + controlX2 + "," + controlY2 + " " + finishX + "," + finishY;
+
+        setContent(path);
     }
 
     @Override
@@ -111,14 +123,14 @@ public class Edge extends javafx.scene.shape.CubicCurve implements IShape {
         if(x1 > x2) // back
         {
 
-            label.setLayoutX(x1 - r - (label.getWidth() / 2));
-            label.setLayoutY((Integer)propertiesMap.get("sy") + this.getBoundsInParent().getHeight() - (label.getHeight() / 2));
+            label.setLayoutX(x1 - r - 8);
+            label.setLayoutY((Integer)propertiesMap.get("sy") + this.getBoundsInParent().getHeight() - 5);
             System.out.println(label.getLayoutY());
         }
         else // next
         {
-            label.setLayoutX(x1 + r -(label.getWidth() / 2));
-            label.setLayoutY((Integer)propertiesMap.get("sy")  - this.getBoundsInParent().getHeight() - (label.getHeight() / 2));
+            label.setLayoutX(x1 + r - 8);
+            label.setLayoutY((Integer)propertiesMap.get("sy")  - this.getBoundsInParent().getHeight() - 5);
         }
 
         label.setText((String) propertiesMap.get("gain"));
