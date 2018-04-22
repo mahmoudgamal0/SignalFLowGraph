@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Path {
 
 
-    ArrayList<Vertex> vertices = new ArrayList<>();
-    String gain = "";
+    public ArrayList<Vertex> vertices = new ArrayList<>();
+    public String gain = "";
 
 }

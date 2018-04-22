@@ -1,6 +1,7 @@
 package Models;
 
 
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 
 import java.util.ArrayList;
@@ -8,9 +9,9 @@ import java.util.Map;
 
 public interface IShape {
 
-    void setProperties(Map<String,Integer> properties);
+    void setProperties(Map<String,Object> properties);
 
-    Map<String,Integer> getPropertiesMap();
+    Map<String,Object> getPropertiesMap();
 
     void init(MouseEvent event);
 
@@ -18,5 +19,7 @@ public interface IShape {
 
     ArrayList<IShape> getConnectedShapes();
 
-    IShape clone();
+    void setLabel(Label label);
+
+    Label getLabel();
 }

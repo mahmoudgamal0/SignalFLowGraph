@@ -2,132 +2,141 @@ package Models;
 
 import Models.Shapes.Circle;
 import Models.Shapes.Edge;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Drawer {
 
     private IShape shape;
-    private ArrayList<IShape> drawnCircles;
-    private ArrayList<IShape> drawnEdges;
+    private ShapeTracker tracker;
 
-    public Drawer (ArrayList<IShape> drawnCircles, ArrayList<IShape> drawnEdges){
-        this.drawnCircles = drawnCircles;
-        this.drawnEdges = drawnEdges;
+    public Drawer (ShapeTracker tracker){
+        this.tracker = tracker;
     }
 
-    public void setShape(IShape shape)
+    public void drawNode(Pane pane, IShape shape)
     {
+        ((Circle)shape).setLayoutX(this.tracker.getX());
+        ((Circle)shape).setLayoutY(this.tracker.getY());
+        shape.setLabel(this.tracker.getNodeLabel());
+        draw(pane,shape);
+    }
+
+    private void draw(Pane pane, IShape shape){
         this.shape = shape;
-    }
-
-    public void draw(Pane pane, MouseEvent event){
-        this.shape = new Circle();
-        this.drawnCircles.add(this.shape);
-        this.shape.init(event);
+        this.tracker.add(this.shape);
         pane.getChildren().add((Node) this.shape);
+        pane.getChildren().add(this.shape.getLabel());
     }
 
-    public void drag(Pane pane, MouseEvent event)
+    public void drag(Pane pane, MouseEvent event, IShape shape)
     {
+        // When Mouse is Pressed
         if(event.getEventType().equals(MouseEvent.MOUSE_PRESSED))
         {
+            this.shape = shape;
             pane.getChildren().add((Node)this.shape);
-            Map<String,Integer> properties = new HashMap<>();
+            Map<String,Object> properties = this.shape.getPropertiesMap();
             properties.put("sx",(int)event.getX());
             properties.put("sy",(int)event.getY());
-            this.shape.setProperties(properties);
+            properties.put("fx",(int)event.getX());
+            properties.put("fy",(int)event.getY());
         }
 
+        // When Mouse is Dragged
         this.shape.init(event);
 
+        // When Mouse is Released
         if(event.getEventType().equals(MouseEvent.MOUSE_RELEASED))
         {
-            int[] validCircles = checkNodeValidity();
+            IShape[] validCircles = tracker.checkNodeValidity(this.shape);
             if(validCircles != null)
             {
-                connectEdgesAndNodes(validCircles);
-                this.drawnEdges.add(this.shape);
-                this.shape = new Edge();
-                return;
+                this.tracker.connectEdgesAndNodes(validCircles,this.shape);
+                this.tracker.add(this.shape);
+                this.shape.setLabel(this.tracker.getEdgeLabel((Integer)this.shape.getPropertiesMap().get("type")));
+                pane.getChildren().add(this.shape.getLabel());
             }
             else
             {
                 pane.getChildren().remove(this.shape);
-                this.shape = new Edge();
                 throw new RuntimeException("Please draw a proper edge");
             }
         }
     }
 
-    public void remove(Pane pane, int index){
-        IShape shapeToDelete;
-        if(this.shape instanceof Circle)
-            shapeToDelete = this.drawnCircles.get(index);
-        else
-            shapeToDelete = this.drawnEdges.get(index);
+    public void removeEdge(Pane pane, MouseEvent event) throws RuntimeException
+    {
+        ArrayList<IShape> temp = this.tracker.getDrawnEdges();
+        if(temp.size() == 0)
+            throw new RuntimeException("Display an error message of no edges");
 
-        pane.getChildren().remove(shapeToDelete);
+        for(int i = 0 ; i < temp.size() ; i++){
+            Edge edge = (Edge) temp.get(0);
+            if(edge.contains(new Point2D(event.getX(),event.getY())))
+                remove(pane,edge);
+        }
+    }
 
-        if(this.shape instanceof Circle)
+    public void removeNode(Pane pane, MouseEvent event) throws RuntimeException
+    {
+        Point point = new Point((int) event.getX(),(int)event.getY());
+        IShape circle = this.tracker.getNearest(point);
+
+        if(circle == null)
+            throw new RuntimeException("Please Select a Node");
+
+        remove(pane,circle);
+    }
+
+    private void remove(Pane pane, IShape shape){
+        this.tracker.remove(shape);
+        pane.getChildren().remove(shape);
+        pane.getChildren().remove(shape.getLabel());
+        if(shape instanceof Circle)
         {
-            ArrayList<IShape> connectedEdges = shapeToDelete.getConnectedShapes();
-            for(int i = 0 ; i < connectedEdges.size() ; i++)
+            for(int i = 0 ; i < shape.getConnectedShapes().size() ; i++)
             {
-                IShape edge = connectedEdges.get(i);
-                this.drawnEdges.remove(edge);
-                pane.getChildren().remove(edge);
+                IShape edge = shape.getConnectedShapes().get(i);
+                remove(pane,edge);
             }
-            this.drawnCircles.remove(index);
+            redraw(pane);
         }
-        else
-            this.drawnEdges.remove(index);
-
     }
 
-    private int[] checkNodeValidity() {
+    private void redraw(Pane pane)
+    {
+        pane.getChildren().clear();
+        ArrayList<IShape> nodes = this.tracker.getDrawnCircles();
+        ArrayList<IShape> edges = this.tracker.getDrawnEdges();
 
-        int startX = this.shape.getPropertiesMap().get("sx");
-        int startY = this.shape.getPropertiesMap().get("sy");
-        int finishX = this.shape.getPropertiesMap().get("fx");
-        int finishY = this.shape.getPropertiesMap().get("fy");
+        ArrayList<IShape> tempNodes = new ArrayList<>(nodes);
+        nodes.clear();
 
-        int i,j;
+        ArrayList<IShape> tempEdges = new ArrayList<>(edges);
+        edges.clear();
 
-        try{
-            i = Utilities.getNearest(this.drawnCircles,new Point(startX,startY));
-            j = Utilities.getNearest(this.drawnCircles,new Point(finishX,finishY));
-        } catch (Exception e) {
-            return null;
+        for (IShape node: tempNodes) {
+            drawNode(pane,node);
         }
 
-        if(i == -1 || j == -1)
-            return null;
+        for (IShape edge: tempEdges) {
 
-        return new int[]{i,j};
-    }
+            IShape node1 = edge.getConnectedShapes().get(0);
+            IShape node2 = edge.getConnectedShapes().get(1);
+            edge.getConnectedShapes().clear();
 
-    private void connectEdgesAndNodes(int[] validNodes) {
-        IShape node1 = this.drawnCircles.get(validNodes[0]);
-        IShape node2 = this.drawnCircles.get(validNodes[1]);
+            IShape[] nodesConnected = {node1,node2};
+            this.tracker.connectEdgesAndNodes(nodesConnected,edge);
+            edge.setLabel(this.tracker.getEdgeLabel((Integer)edge.getPropertiesMap().get("type")));
+            draw(pane,edge);
+        }
 
-        this.shape.addConnectedShape(node1);
-        this.shape.addConnectedShape(node2);
-
-        this.shape.getPropertiesMap().put("sx",(int)((Circle)node1).getLayoutX());
-        this.shape.getPropertiesMap().put("sy",(int)((Circle)node1).getLayoutY());
-        this.shape.getPropertiesMap().put("fx",(int)((Circle)node2).getLayoutX());
-        this.shape.getPropertiesMap().put("fy",(int)((Circle)node2).getLayoutY());
-
-        ((Edge)this.shape).refresh();
-
-        node1.addConnectedShape(this.shape);
-        node2.addConnectedShape(this.shape);
     }
 }

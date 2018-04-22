@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 public class Loop {
 
-    ArrayList<Vertex> vertices = new ArrayList<>();
+    public ArrayList<Vertex> vertices = new ArrayList<>();
     HashMap<String,Integer> verticesName = new HashMap<>();
     String gain;
     int loopID;
