@@ -17,6 +17,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -76,7 +77,6 @@ public class Controller{
 
         this.select.setOnAction(e->{
             this.selectedIShape = null;
-            this.mode = "select";
         });
 
         this.addNode.setOnAction(e->{
@@ -176,36 +176,6 @@ public class Controller{
         }
     }
 
-    @FXML
-    public void select(MouseEvent event){
-        if(this.selectedIShape != null && !this.mode.equals("select"))
-            return;
-
-        for(IShape edge : drawnEdges) {
-
-            if(((Edge)edge).getBoundsInParent().contains(new Point2D(event.getX(),event.getY()))){
-                Label label = edge.getLabel();
-                TextField text = new TextField(label.getText());
-                text.setLayoutX(label.getLayoutX());
-                text.setLayoutY(label.getLayoutY());
-                text.setPrefHeight(label.getHeight());
-                text.setPrefWidth(label.getWidth());
-                text.setEditable(true);
-                pane.getChildren().remove(label);
-                text.setOnAction(e->{
-                    label.setText(text.getText());
-                    edge.getPropertiesMap().put("gain",label.getText());
-                    pane.getChildren().remove(text);
-                    pane.getChildren().add(label);
-                });
-
-                pane.getChildren().add(text);
-                return;
-            }
-        }
-        throw new RuntimeException("Please select a Label");
-
-    }
     public void calculate()
     {
         SFG sfg = new SFG(this.drawnNodes,this.drawnEdges);

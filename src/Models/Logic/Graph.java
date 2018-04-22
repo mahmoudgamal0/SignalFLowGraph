@@ -265,7 +265,7 @@ public class Graph {
                 }
             }
             if(finalValue.length() != 0)
-                finalValue += " * ";
+                finalValue += " + ";
                 finalValue += "(" + path.gain +")*(" +totalGain+")";
             }
             String totalGain="1 ";

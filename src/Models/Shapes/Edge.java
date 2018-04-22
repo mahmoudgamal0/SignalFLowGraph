@@ -3,8 +3,9 @@ package Models.Shapes;
 import Models.IShape;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 
@@ -20,6 +21,7 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
     private int sx;
     private int sy;
 
+
     public Edge(){
         super();
         this.propertiesMap = new HashMap<>();
@@ -30,10 +32,11 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
         this.propertiesMap.put("type",0);
         this.propertiesMap.put("gain"," ");
         this.connectedNodes = new ArrayList<>();
+
         setStroke(Paint.valueOf("CYAN"));
         setFill(Paint.valueOf("TRANSPARENT"));
         setStrokeWidth(3);
-        setPickOnBounds(false);
+
 
     }
 
@@ -99,8 +102,8 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
 
         String path = "M " + startX + "," + startY +" ";
         path+= "C " + controlX1 + "," + controlY1 + " " + controlX2 + "," + controlY2 + " " + finishX + "," + finishY;
-
         setContent(path);
+
     }
 
     @Override
@@ -134,10 +137,32 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
         }
 
         label.setText((String) propertiesMap.get("gain"));
+
+        label.setOnMouseClicked(e-> {
+            Pane pane = (Pane) this.getParent();
+            showText(pane);
+        });
     }
 
+    private void showText(Pane pane){
+        TextField text = new TextField(label.getText());
+        text.setLayoutX(label.getLayoutX());
+        text.setLayoutY(label.getLayoutY());
+        text.setPrefHeight(label.getHeight());
+        text.setPrefWidth(label.getWidth());
+        text.setEditable(true);
+        pane.getChildren().remove(label);
+        text.setOnAction(e->{
+            label.setText(text.getText());
+            getPropertiesMap().put("gain",label.getText());
+            pane.getChildren().remove(text);
+            pane.getChildren().add(label);
+        });
+        pane.getChildren().add(text);
+    }
     @Override
     public Label getLabel() {
         return this.label;
     }
+
 }
