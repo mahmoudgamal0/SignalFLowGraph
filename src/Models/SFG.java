@@ -45,40 +45,61 @@ public class SFG {
 
         ArrayList<String> result = new ArrayList<>();
 
-        result.add("# of forward paths:" + Integer.toString(numOfPaths) + "\n");
+        result.add("# of forward paths = " + Integer.toString(numOfPaths) + "\n");
 
         for(int i = 0 ; i < paths.size() ; i++)
         {
-            String vertices = "Vertices: ";
+            String path = "Path #" + Integer.toString(i+1) + "\n" +
+                        "\t Gain= " + paths.get(i).gain + "\n";
+            path += "\t Vertices= ";
             for (int j = 0 ; j < paths.get(i).vertices.size(); j++)
-                vertices += paths.get(i).vertices.get(j).name + " ";
-            result.add(vertices + "\n");
-            result.add("#" + Integer.toString(i+1) + " = " + paths.get(i).gain + "\n\n");
+                path += paths.get(i).vertices.get(j).name + " ";
+            result.add(path + "\n\n");
         }
 
+        result.add("-------------------------------");
         return result;
     }
 
     public ArrayList<String> getLoops(){
+        return getLoops(this.graph.getLoops());
+    }
 
-        ArrayList<Loop> loops = this.graph.getLoops();
-
+    private ArrayList<String> getLoops(ArrayList<Loop> loops)
+    {
         int numOfLoops = loops.size();
 
         ArrayList<String> result = new ArrayList<>();
 
-        result.add("# of loops:" + Integer.toString(numOfLoops) + "\n");
+        result.add("# of loops = " + Integer.toString(numOfLoops) + "\n");
 
         for(int i = 0 ; i < loops.size() ; i++)
         {
-            String vertices = "Vertices: ";
+            String loop = "Loop #" + Integer.toString(i+1)  + "\n" +
+                    "\t Gain= " + loops.get(i).gain + "\n";
+            loop += "\t Vertices: ";
             for (int j = 0 ; j < loops.get(i).vertices.size(); j++)
-                vertices += loops.get(i).vertices.get(j).name + " ";
-            result.add(vertices + "\n");
-            result.add("#" + Integer.toString(i+1) + " = " + loops.get(i).gain + "\n\n");
+                loop += loops.get(i).vertices.get(j).name + " ";
+            result.add(loop + "\n\n");
         }
 
+        result.add("-------------------------------\n");
+        return result;
+
+    }
+
+    public ArrayList<String> getAllLoopsCombinations(){
+        ArrayList<ArrayList<Loop>>[] loops = this.graph.getAllLoopsCombinations(this.graph.getLoops());
+
+        ArrayList<String> result = new ArrayList<>();
+
+        for(int i = 0 ; i < loops.length ; i++)
+        {
+            result.add("Loop Combination #" + Integer.toString(i) + "\n");
+         //   result.addAll(getLoops(loops[i]));
+        }
         return result;
     }
+
 
 }

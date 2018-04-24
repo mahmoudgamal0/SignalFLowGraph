@@ -18,7 +18,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -36,6 +38,8 @@ public class Controller{
     private JFXListView<JFXButton> listView;
     @FXML
     private Pane pane;
+    @FXML
+    private StackPane stackPane;
 
     private Drawer drawer;
     private ShapeTracker tracker;
@@ -320,11 +324,10 @@ public class Controller{
         ArrayList<String> loops = sfg.getLoops();
         ArrayList<String> paths = sfg.getForwardPaths();
 
-        String result = "";
-        for(int i = 0 ; i < paths.size() ; i++)
-            result += paths.get(i);
+        FormulateTextData ftd = new FormulateTextData(paths,loops);
 
-        AlertBox.alert("gain",result);
+
+        DialogBox.dialog(this.stackPane,new Text("Gain"),ftd.getData());
 
     }
 
