@@ -30,14 +30,12 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
         this.propertiesMap.put("fx",0);
         this.propertiesMap.put("fy",0);
         this.propertiesMap.put("type",0);
-        this.propertiesMap.put("gain"," ");
+        this.propertiesMap.put("gain","To Set");
         this.connectedNodes = new ArrayList<>();
 
         setStroke(Paint.valueOf("CYAN"));
         setFill(Paint.valueOf("TRANSPARENT"));
         setStrokeWidth(3);
-
-
     }
 
     @Override
@@ -125,10 +123,8 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
 
         if(x1 > x2) // back
         {
-
             label.setLayoutX(x1 - r - 8);
-            label.setLayoutY((Integer)propertiesMap.get("sy") + this.getBoundsInParent().getHeight() - 5);
-            System.out.println(label.getLayoutY());
+            label.setLayoutY((Integer)propertiesMap.get("sy") + this.getBoundsInParent().getHeight() - 12);
         }
         else // next
         {
@@ -138,28 +134,8 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
 
         label.setText((String) propertiesMap.get("gain"));
 
-        label.setOnMouseClicked(e-> {
-            Pane pane = (Pane) this.getParent();
-            showText(pane);
-        });
     }
 
-    private void showText(Pane pane){
-        TextField text = new TextField(label.getText());
-        text.setLayoutX(label.getLayoutX());
-        text.setLayoutY(label.getLayoutY());
-        text.setPrefHeight(label.getHeight());
-        text.setPrefWidth(label.getWidth());
-        text.setEditable(true);
-        pane.getChildren().remove(label);
-        text.setOnAction(e->{
-            label.setText(text.getText());
-            getPropertiesMap().put("gain",label.getText());
-            pane.getChildren().remove(text);
-            pane.getChildren().add(label);
-        });
-        pane.getChildren().add(text);
-    }
     @Override
     public Label getLabel() {
         return this.label;

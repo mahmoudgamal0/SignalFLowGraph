@@ -45,14 +45,14 @@ public class SFG {
 
         ArrayList<String> result = new ArrayList<>();
 
-        result.add("# of forward paths:" + Integer.toString(numOfPaths));
+        result.add("# of forward paths:" + Integer.toString(numOfPaths) + "\n");
 
         for(int i = 0 ; i < paths.size() ; i++)
         {
             String vertices = "Vertices: ";
             for (int j = 0 ; j < paths.get(i).vertices.size(); j++)
                 vertices += paths.get(i).vertices.get(j).name + " ";
-            result.add(vertices);
+            result.add(vertices + "\n");
             result.add("#" + Integer.toString(i+1) + " = " + paths.get(i).gain + "\n\n");
         }
 
@@ -67,14 +67,14 @@ public class SFG {
 
         ArrayList<String> result = new ArrayList<>();
 
-        result.add("# of loops:" + Integer.toString(numOfLoops));
+        result.add("# of loops:" + Integer.toString(numOfLoops) + "\n");
 
         for(int i = 0 ; i < loops.size() ; i++)
         {
             String vertices = "Vertices: ";
             for (int j = 0 ; j < loops.get(i).vertices.size(); j++)
                 vertices += loops.get(i).vertices.get(j).name + " ";
-            result.add(vertices);
+            result.add(vertices + "\n");
             result.add("#" + Integer.toString(i+1) + " = " + loops.get(i).gain + "\n\n");
         }
 
