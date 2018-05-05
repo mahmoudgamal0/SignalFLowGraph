@@ -9,15 +9,23 @@ public class FormulateTextData {
 
     private ArrayList<String> paths;
     private ArrayList<String> loops;
+    private String gain;
 
-    public FormulateTextData(ArrayList<String> paths, ArrayList<String> loops) {
+    public FormulateTextData(ArrayList<String> paths, ArrayList<String> loops, String gain) {
         this.paths = paths;
         this.loops = loops;
+        this.gain = gain;
     }
 
     public Node getData(){
-        return formulateLoops((Text) formulatePaths(new Text()));
+        return formulateGain((Text) formulateLoops((Text) formulatePaths(new Text())));
     }
+
+    private Node formulateGain(Text label){
+        label.setText(label.getText() + "Overall Gain: \n" + this.gain);
+        return label;
+    }
+
     private Node formulatePaths(Text label)
     {
         label.setText(label.getText() + "Forward Paths: \n");

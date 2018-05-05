@@ -57,16 +57,13 @@ public class SFG {
             result.add(path + "\n\n");
         }
 
-        result.add("-------------------------------");
+        result.add("-------------------------------\n");
         return result;
     }
 
-    public ArrayList<String> getLoops(){
-        return getLoops(this.graph.getLoops());
-    }
-
-    private ArrayList<String> getLoops(ArrayList<Loop> loops)
+    public ArrayList<String> getLoops()
     {
+        ArrayList<Loop> loops = this.graph.getLoops();
         int numOfLoops = loops.size();
 
         ArrayList<String> result = new ArrayList<>();
@@ -88,18 +85,10 @@ public class SFG {
 
     }
 
-    public ArrayList<String> getAllLoopsCombinations(){
-        ArrayList<ArrayList<Loop>>[] loops = this.graph.getAllLoopsCombinations(this.graph.getLoops());
-
-        ArrayList<String> result = new ArrayList<>();
-
-        for(int i = 0 ; i < loops.length ; i++)
-        {
-            result.add("Loop Combination #" + Integer.toString(i) + "\n");
-         //   result.addAll(getLoops(loops[i]));
-        }
-        return result;
+    public String getGain()
+    {
+        String source = this.drawnNodes.get(0).getLabel().getText();
+        String sink = this.drawnNodes.get(this.drawnNodes.size()-1).getLabel().getText();
+        return "\t Gain= " + this.graph.evaluateGain(source,sink);
     }
-
-
 }

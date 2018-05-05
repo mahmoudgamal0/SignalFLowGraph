@@ -15,6 +15,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -64,15 +66,15 @@ public class Controller{
     private Stage window;
 
     public Controller(){
-        this.gain = new JFXButton("Gain");
-        this.addNode = new JFXButton("Add Node");
-        this.addEdge = new JFXButton("Add Edge");
-        this.deleteNode = new JFXButton("Delete Node");
-        this.removeEdge = new JFXButton("Remove Edge");
-        this.calculate = new JFXButton("Calculate");
-        this.selectorUp = new JFXButton("Up");
-        this.selectorDown = new JFXButton("Down");
-        this.select = new JFXButton("Select");
+        this.gain = new JFXButton();
+        this.addNode = new JFXButton();
+        this.addEdge = new JFXButton();
+        this.deleteNode = new JFXButton();
+        this.removeEdge = new JFXButton();
+        this.calculate = new JFXButton();
+        this.selectorUp = new JFXButton();
+        this.selectorDown = new JFXButton();
+        this.select = new JFXButton();
 
         this.drawnEdges = new ArrayList<>();
         this.drawnNodes = new ArrayList<>();
@@ -96,6 +98,8 @@ public class Controller{
             initSelectors("label");
         });
 
+        this.gain.setGraphic(new ImageView(new Image("/Views/Images/gain.png")));
+
         this.addNode.setOnAction(e->{
             removeSelectors();
             this.selectedIShape = new Circle();
@@ -103,17 +107,23 @@ public class Controller{
             drawNode();
         });
 
+        this.addNode.setGraphic(new ImageView(new Image("/Views/Images/plus.png")));
+
         this.addEdge.setOnAction(e->{
             removeSelectors();
             this.selectedIShape = new Edge();
             this.mode = "add";
         });
 
+        this.addEdge.setGraphic(new ImageView(new Image("/Views/Images/plus-edge.png")));
+
         this.deleteNode.setOnAction(e->{
             removeSelectors();
             this.selectedIShape = new Circle();
             this.mode = "remove";
         });
+
+        this.deleteNode.setGraphic(new ImageView(new Image("/Views/Images/minus.png")));
 
         this.removeEdge.setOnAction(e->{
             removeSelectors();
@@ -123,21 +133,56 @@ public class Controller{
             initSelectors("edge");
         });
 
+        this.removeEdge.setGraphic(new ImageView(new Image("/Views/Images/minus-edge.png")));
+
+
         this.calculate.setOnAction(e->{
             removeSelectors();
             calculate();
         });
 
+        this.calculate.setGraphic(new ImageView(new Image("/Views/Images/calculate.png")));
+
+        this.selectorUp.setGraphic(new ImageView(new Image("/Views/Images/up.png")));
+
+        this.selectorDown.setGraphic(new ImageView(new Image("/Views/Images/down.png")));
+
+        this.select.setGraphic(new ImageView(new Image("/Views/Images/select.png")));
     }
 
     private void initListView() {
         this.listView.getItems().addAll(gain,addNode,addEdge,deleteNode,removeEdge,calculate);
-        this.listView.expandedProperty().set(true);
         this.listView.setVerticalGap(5.0);
+    }
 
-        this.listView.setOnMouseEntered(e->this.listView.setExpanded(true));
+    public void init()
+    {
+        this.window = (Stage)this.splitPane.getScene().getWindow();
+        Node divider = this.splitPane.lookup(".split-pane-divider");
+        divider.setOnMouseClicked(e->{
+            if(!isExpanded)
+                showSwapPane().play();
+            else
+                hideSwapPane().play();
+        });
 
-        this.listView.setOnMouseExited(e->this.listView.setExpanded(false));
+        this.window.widthProperty().addListener(observable ->{
+            this.stackPane.setPrefWidth(this.window.getWidth());
+            this.splitPane.setPrefWidth(this.window.getWidth() - 16);
+            this.pane.setPrefWidth(this.window.getWidth());
+            if(isExpanded)
+                hideSwapPane().play();
+            this.splitPane.setDividerPosition(0,1);
+        });
+
+        this.window.heightProperty().addListener((observable -> {
+            this.stackPane.setPrefHeight(this.window.getHeight());
+            this.splitPane.setPrefHeight(this.window.getHeight() - 40);
+            this.pane.setPrefHeight(this.window.getHeight());
+            this.splitPane.setDividerPosition(0,1);
+            if(isExpanded)
+                hideSwapPane().play();
+        }));
     }
 
     private void removeSelectors()
@@ -262,24 +307,6 @@ public class Controller{
     }
 
     @FXML
-    public void move()
-    {
-        this.window = (Stage)this.splitPane.getScene().getWindow();
-        Node divider = this.splitPane.lookup(".split-pane-divider");
-        divider.setOnMouseClicked(e->{
-            if(!isExpanded)
-                showSwapPane().play();
-            else
-                hideSwapPane().play();
-        });
-
-        this.window.widthProperty().addListener((observable,o,n)->{
-            this.splitPane.setDividerPosition(0,1);
-        });
-    }
-
-
-    @FXML
     public void drawEdges(MouseEvent event)
     {
         if(this.selectedIShape == null || this.selectedIShape instanceof Circle)
@@ -318,14 +345,18 @@ public class Controller{
 
     public void calculate()
     {
+        if(this.drawnEdges.isEmpty() || this.drawnNodes.isEmpty())
+        {
+            AlertBox.alert("Calculation Error", "There are no sufficient nodes and edges");
+            return;
+        }
         SFG sfg = new SFG(this.drawnNodes,this.drawnEdges);
         sfg.assembleGraph();
 
         ArrayList<String> loops = sfg.getLoops();
         ArrayList<String> paths = sfg.getForwardPaths();
 
-        FormulateTextData ftd = new FormulateTextData(paths,loops);
-
+        FormulateTextData ftd = new FormulateTextData(paths,loops,sfg.getGain());
 
         DialogBox.dialog(this.stackPane,new Text("Gain"),ftd.getData());
 
@@ -340,7 +371,7 @@ public class Controller{
 
             @Override
             protected void interpolate(double fraction) {
-                splitPane.setDividerPosition(0,0.8 + fraction/5.0);
+                splitPane.setDividerPosition(0,1 - (60/window.getWidth()) + fraction/(window.getWidth()/60));
             }
         };
 
@@ -363,7 +394,7 @@ public class Controller{
 
             @Override
             protected void interpolate(double fraction) {
-                splitPane.setDividerPosition(0,1 - fraction/5.0);
+                splitPane.setDividerPosition(0,1 - fraction/(window.getWidth()/60));
             }
         };
 

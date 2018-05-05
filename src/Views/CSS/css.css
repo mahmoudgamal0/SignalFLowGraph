@@ -7,12 +7,16 @@
     -fx-background-position: 90%;
 }
 
+
 .jfx-list-cell:selected {
-    -fx-background-color: red;
+    -fx-background-color: #ADEDB2;
 }
 
 .jfx-list-cell {
-    -fx-background-insets: 0.0;
+    -fx-alignment: center;
+    -fx-fill-width: true;
+    -fx-fill-height: true;
+    -fx-padding: 0;
 }
 
 .jfx-list-cell .jfx-list-rippler{
@@ -20,5 +24,5 @@
 }
 
 .jfx-list-cell:hover {
-    -fx-background-color: green;
+    -fx-background-color: #71A9F7;
 }
