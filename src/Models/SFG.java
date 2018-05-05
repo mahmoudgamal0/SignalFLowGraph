@@ -90,6 +90,6 @@ public class SFG {
     {
         String source = this.drawnNodes.get(0).getLabel().getText();
         String sink = this.drawnNodes.get(this.drawnNodes.size()-1).getLabel().getText();
-        return "\t Gain= " + Double.toString(this.graph.evaluateGain(source,sink).gainValue);
+        return "\t Gain= " + this.graph.evaluateGain(source,sink).gain+ "\n" + Double.toString(this.graph.evaluateGain(source,sink).gainValue);
     }
 }
