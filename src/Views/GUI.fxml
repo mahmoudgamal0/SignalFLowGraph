@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import com.jfoenix.controls.*?>
-<?import java.lang.*?>
-<?import javafx.scene.canvas.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import com.jfoenix.controls.JFXListView?>
-<?import javafx.scene.canvas.Canvas?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.layout.AnchorPane?>
 
-<SplitPane fx:id="splitPane" dividerPositions="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#move" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Controller">
-  <items>
-    <AnchorPane minHeight="0.0" minWidth="0.0" onMouseClicked="#select" prefHeight="160.0" prefWidth="100.0">
-         <children>
-            <Pane fx:id="pane" onMouseClicked="#drawNodes" onMouseDragged="#drawEdges" onMousePressed="#drawEdges" onMouseReleased="#drawEdges" prefHeight="398.0" prefWidth="592.0" />
-         </children></AnchorPane>
-      <JFXListView fx:id="listView" prefHeight="400.0" prefWidth="248.0" />
-  </items>
-</SplitPane>
+
+
+<StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.Controller">
+   <children>
+      <SplitPane fx:id="splitPane" dividerPositions="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#move" prefHeight="400.0" prefWidth="600.0">
+         <items>
+            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
+               <children>
+                  <Pane fx:id="pane" onMouseClicked="#removeNodes" onMouseDragged="#drawEdges" onMousePressed="#drawEdges" onMouseReleased="#drawEdges" prefHeight="398.0" prefWidth="592.0" />
+               </children>
+            </AnchorPane>
+            <JFXListView fx:id="listView" prefHeight="400.0" prefWidth="248.0" />
+         </items>
+      </SplitPane>
+   </children>
+</StackPane>

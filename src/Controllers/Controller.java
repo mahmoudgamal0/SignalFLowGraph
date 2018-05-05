@@ -17,11 +17,17 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Paint;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
 
 
 public class Controller{
@@ -32,6 +38,8 @@ public class Controller{
     private JFXListView<JFXButton> listView;
     @FXML
     private Pane pane;
+    @FXML
+    private StackPane stackPane;
 
     private Drawer drawer;
     private ShapeTracker tracker;
@@ -41,23 +49,30 @@ public class Controller{
     private IShape selectedIShape;
     private String mode;
 
-    private JFXButton select;
+    private JFXButton gain;
     private JFXButton addNode;
     private JFXButton deleteNode;
     private JFXButton addEdge;
     private JFXButton removeEdge;
     private JFXButton calculate;
+    private JFXButton selectorUp;
+    private JFXButton selectorDown;
+    private JFXButton select;
 
+    private int currentEdge;
     private boolean isExpanded;
     private Stage window;
 
     public Controller(){
-        this.select = new JFXButton("Select");
+        this.gain = new JFXButton("Gain");
         this.addNode = new JFXButton("Add Node");
         this.addEdge = new JFXButton("Add Edge");
         this.deleteNode = new JFXButton("Delete Node");
         this.removeEdge = new JFXButton("Remove Edge");
         this.calculate = new JFXButton("Calculate");
+        this.selectorUp = new JFXButton("Up");
+        this.selectorDown = new JFXButton("Down");
+        this.select = new JFXButton("Select");
 
         this.drawnEdges = new ArrayList<>();
         this.drawnNodes = new ArrayList<>();
@@ -74,47 +89,176 @@ public class Controller{
 
     private void initButtons() {
 
-        this.select.setOnAction(e->{
+        this.gain.setOnAction(e->{
+            removeSelectors();
+            this.currentEdge = 0;
             this.selectedIShape = null;
-            this.mode = "select";
+            initSelectors("label");
         });
 
         this.addNode.setOnAction(e->{
+            removeSelectors();
             this.selectedIShape = new Circle();
             this.mode = "add";
+            drawNode();
         });
 
         this.addEdge.setOnAction(e->{
+            removeSelectors();
             this.selectedIShape = new Edge();
             this.mode = "add";
         });
 
         this.deleteNode.setOnAction(e->{
+            removeSelectors();
             this.selectedIShape = new Circle();
             this.mode = "remove";
         });
 
         this.removeEdge.setOnAction(e->{
+            removeSelectors();
             this.selectedIShape = new Edge();
             this.mode = "remove";
+            this.currentEdge = 0;
+            initSelectors("edge");
         });
 
-        this.calculate.setOnAction(e->calculate());
+        this.calculate.setOnAction(e->{
+            removeSelectors();
+            calculate();
+        });
 
     }
 
     private void initListView() {
-        this.listView.getItems().addAll(select,addNode,addEdge,deleteNode,removeEdge,calculate);
+        this.listView.getItems().addAll(gain,addNode,addEdge,deleteNode,removeEdge,calculate);
         this.listView.expandedProperty().set(true);
-        this.listView.setVerticalGap(10.0);
+        this.listView.setVerticalGap(5.0);
 
-        this.listView.setOnMouseEntered(e->{
-            this.listView.setExpanded(true);
+        this.listView.setOnMouseEntered(e->this.listView.setExpanded(true));
+
+        this.listView.setOnMouseExited(e->this.listView.setExpanded(false));
+    }
+
+    private void removeSelectors()
+    {
+        if(this.listView.getItems().contains(this.select))
+            this.listView.getItems().removeAll(this.selectorUp,this.select,this.selectorDown);
+        deselect();
+    }
+
+    private void initSelectors(String item) {
+
+        this.listView.getItems().addAll(this.selectorUp,this.select,this.selectorDown);
+
+        this.selectorUp.setOnAction(e->{
+            try{
+                checkOpenLabels();
+                this.currentEdge++;
+                try{
+                    nextEdge();
+                } catch (RuntimeException ex) {
+                    AlertBox.alert("Edge Warning",ex.getMessage());
+                }
+            } catch (RuntimeException ex) {
+                AlertBox.alert("Label Warning",ex.getMessage());
+            }
+
         });
 
-        this.listView.setOnMouseExited(e->{
-            this.listView.setExpanded(false);
+        this.select.setOnAction(e->{
+            try{
+                checkOpenLabels();
+                if(item.equals("edge"))
+                    this.drawer.removeEdge(this.pane,this.currentEdge);
+                else
+                    showText((Edge) this.drawnEdges.get(this.currentEdge));
+            } catch (RuntimeException ex) {
+                AlertBox.alert("Label Warning",ex.getMessage());
+            }
         });
+
+        this.selectorDown.setOnAction(e->{
+            try{
+                checkOpenLabels();
+                this.currentEdge--;
+                try{
+                    prevEdge();
+                } catch (RuntimeException ex) {
+                    AlertBox.alert("Edge Warning",ex.getMessage());
+                }
+            } catch (RuntimeException ex) {
+                AlertBox.alert("Label Warning",ex.getMessage());
+            }
+        });
+    }
+
+    private void checkOpenLabels() {
+        Set textFields = this.pane.lookupAll(".text-field");
+        if(textFields.size() == 1)
+            throw new RuntimeException("Please close all labels first");
+    }
+
+    private void prevEdge() {
+
+        if(this.drawnEdges.size() == 0)
+            throw new RuntimeException("No edges exist");
+
+        if(this.currentEdge == -1)
+            this.currentEdge = this.drawnEdges.size()-1;
+        Edge edge = (Edge) this.drawnEdges.get(this.currentEdge);
+
+        int nextIndex = (this.currentEdge + 1) % this.drawnEdges.size();
+        Edge nextEdge = (Edge) this.drawnEdges.get(nextIndex);
+
+        nextEdge.setStroke(Paint.valueOf("CYAN"));
+        edge.setStroke(Paint.valueOf("GREEN"));
+    }
+
+    private void nextEdge() {
+
+        if(this.drawnEdges.size() == 0)
+            throw new RuntimeException("No edges exist");
+
+        if(this.currentEdge == this.drawnEdges.size())
+            this.currentEdge = 0;
+
+        Edge edge = (Edge) this.drawnEdges.get(this.currentEdge);
+
+        int prevIndex;
+        if(this.currentEdge == 0)
+            prevIndex = this.drawnEdges.size()-1;
+        else
+            prevIndex = this.currentEdge - 1;
+        Edge prevEdge = (Edge) this.drawnEdges.get(prevIndex);
+
+        prevEdge.setStroke(Paint.valueOf("CYAN"));
+        edge.setStroke(Paint.valueOf("GREEN"));
+    }
+
+    private void deselect()
+    {
+        for (IShape edge: this.drawnEdges) {
+            ((Edge)edge).setStroke(Paint.valueOf("CYAN"));
+        }
+    }
+
+    private void showText(Edge edge){
+        Label label = edge.getLabel();
+        TextField text = new TextField(label.getText());
+        text.setLayoutX(label.getLayoutX());
+        text.setLayoutY(label.getLayoutY());
+        text.setPrefHeight(label.getHeight());
+        text.setPrefWidth(label.getWidth());
+        text.setEditable(true);
+        pane.getChildren().remove(label);
+        text.setOnAction(e->{
+            label.setText(text.getText());
+            edge.getPropertiesMap().put("gain",label.getText());
+            pane.getChildren().remove(text);
+            pane.getChildren().add(label);
+        });
+        pane.getChildren().add(text);
     }
 
     @FXML
@@ -134,6 +278,7 @@ public class Controller{
         });
     }
 
+
     @FXML
     public void drawEdges(MouseEvent event)
     {
@@ -148,25 +293,15 @@ public class Controller{
                 AlertBox.alert("Edge Warning",e.getMessage());
             }
         }
-        else
-        {
-            try {
-                this.drawer.removeEdge(pane,event);
-            } catch (RuntimeException e) {
-                AlertBox.alert("Edge Warning",e.getMessage());
-            }
-        }
     }
 
     @FXML
-    public void drawNodes(MouseEvent event){
+    public void removeNodes(MouseEvent event){
 
         if(this.selectedIShape == null || this.selectedIShape instanceof Edge)
             return;
 
-        if(this.mode.equals("add"))
-            this.drawer.drawNode(this.pane,new Circle());
-        else
+        if(this.mode.equals("remove"))
         {
             try{
                 this.drawer.removeNode(pane,event);
@@ -176,36 +311,11 @@ public class Controller{
         }
     }
 
-    @FXML
-    public void select(MouseEvent event){
-        if(this.selectedIShape != null && !this.mode.equals("select"))
-            return;
-
-        for(IShape edge : drawnEdges) {
-
-            if(((Edge)edge).getBoundsInParent().contains(new Point2D(event.getX(),event.getY()))){
-                Label label = edge.getLabel();
-                TextField text = new TextField(label.getText());
-                text.setLayoutX(label.getLayoutX());
-                text.setLayoutY(label.getLayoutY());
-                text.setPrefHeight(label.getHeight());
-                text.setPrefWidth(label.getWidth());
-                text.setEditable(true);
-                pane.getChildren().remove(label);
-                text.setOnAction(e->{
-                    label.setText(text.getText());
-                    edge.getPropertiesMap().put("gain",label.getText());
-                    pane.getChildren().remove(text);
-                    pane.getChildren().add(label);
-                });
-
-                pane.getChildren().add(text);
-                return;
-            }
-        }
-        throw new RuntimeException("Please select a Label");
-
+    private void drawNode()
+    {
+        this.drawer.drawNode(this.pane,new Circle());
     }
+
     public void calculate()
     {
         SFG sfg = new SFG(this.drawnNodes,this.drawnEdges);
@@ -214,11 +324,10 @@ public class Controller{
         ArrayList<String> loops = sfg.getLoops();
         ArrayList<String> paths = sfg.getForwardPaths();
 
-        String result = "";
-        for(int i = 0 ; i < paths.size() ; i++)
-            result += paths.get(i);
+        FormulateTextData ftd = new FormulateTextData(paths,loops);
 
-        AlertBox.alert("gain",result);
+
+        DialogBox.dialog(this.stackPane,new Text("Gain"),ftd.getData());
 
     }
 

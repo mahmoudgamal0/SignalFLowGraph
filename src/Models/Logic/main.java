@@ -27,6 +27,8 @@ public class main {
         x.addEdge("4","1","8");
         x.addEdge("4","4","9");
 
+        System.out.println(x.getLoops());
+        System.out.println(x.getAllLoopsCombinations(x.getLoops()));
         System.out.println(x.evaluateGain("1","5"));
 
 

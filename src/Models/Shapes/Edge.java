@@ -3,8 +3,9 @@ package Models.Shapes;
 import Models.IShape;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.*;
 
@@ -20,6 +21,7 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
     private int sx;
     private int sy;
 
+
     public Edge(){
         super();
         this.propertiesMap = new HashMap<>();
@@ -28,13 +30,12 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
         this.propertiesMap.put("fx",0);
         this.propertiesMap.put("fy",0);
         this.propertiesMap.put("type",0);
-        this.propertiesMap.put("gain"," ");
+        this.propertiesMap.put("gain","To Set");
         this.connectedNodes = new ArrayList<>();
+
         setStroke(Paint.valueOf("CYAN"));
         setFill(Paint.valueOf("TRANSPARENT"));
         setStrokeWidth(3);
-        setPickOnBounds(false);
-
     }
 
     @Override
@@ -99,8 +100,8 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
 
         String path = "M " + startX + "," + startY +" ";
         path+= "C " + controlX1 + "," + controlY1 + " " + controlX2 + "," + controlY2 + " " + finishX + "," + finishY;
-
         setContent(path);
+
     }
 
     @Override
@@ -122,10 +123,8 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
 
         if(x1 > x2) // back
         {
-
             label.setLayoutX(x1 - r - 8);
-            label.setLayoutY((Integer)propertiesMap.get("sy") + this.getBoundsInParent().getHeight() - 5);
-            System.out.println(label.getLayoutY());
+            label.setLayoutY((Integer)propertiesMap.get("sy") + this.getBoundsInParent().getHeight() - 12);
         }
         else // next
         {
@@ -134,10 +133,12 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
         }
 
         label.setText((String) propertiesMap.get("gain"));
+
     }
 
     @Override
     public Label getLabel() {
         return this.label;
     }
+
 }

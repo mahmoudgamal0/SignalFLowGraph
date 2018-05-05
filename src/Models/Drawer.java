@@ -71,17 +71,9 @@ public class Drawer {
         }
     }
 
-    public void removeEdge(Pane pane, MouseEvent event) throws RuntimeException
+    public void removeEdge(Pane pane, int edge)
     {
-        ArrayList<IShape> temp = this.tracker.getDrawnEdges();
-        if(temp.size() == 0)
-            throw new RuntimeException("Display an error message of no edges");
-
-        for(int i = 0 ; i < temp.size() ; i++){
-            Edge edge = (Edge) temp.get(0);
-            if(edge.contains(new Point2D(event.getX(),event.getY())))
-                remove(pane,edge);
-        }
+        remove(pane,this.tracker.getDrawnEdges().get(edge));
     }
 
     public void removeNode(Pane pane, MouseEvent event) throws RuntimeException
