@@ -171,7 +171,7 @@ public class Graph {
         ArrayList<ArrayList<Loop>>[] result = getAllLoopsCombinations(loops);
         if (result.length == 0)
             return result;
-        int finalIndex = result.length - 1;
+        int finalIndex = result.length;
 
         for(int i = 0 ; i < result.length ; i++) {
             boolean touching = false;
@@ -206,7 +206,7 @@ public class Graph {
 
         }
 
-        ArrayList<ArrayList<Loop>>[] finalResult = new ArrayList[finalIndex ];
+        ArrayList<ArrayList<Loop>>[] finalResult = new ArrayList[finalIndex];
 
         for (int i = 0; i < finalResult.length; i++) {
             finalResult[i] = result[i];
@@ -276,23 +276,21 @@ public class Graph {
                 }
                 for (int i = 0; i < loopCombinations.length; i++) {
                     for (int j = 0; j < loopCombinations[i].size(); j++) {
+                        int sign = 1;
+                        double tmp = 1;
                         if ((i & 1) == 0) {
                             totalGain += "+ (";
-                            for (int k = 0; k < loopCombinations[i].get(j).size() - 1; k++) {
-                                totalGain += loopCombinations[i].get(j).get(k).gain + " * ";
-                                totalGainValue += loopCombinations[i].get(j).get(k).gainValue;
-                            }
-                            totalGain += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gain + ") ";
-                            totalGainValue += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gainValue;
-                        } else {
+                           } else {
+                            sign = -1;
                             totalGain += "- (";
-                            for (int k = 0; k < loopCombinations[i].get(j).size() - 1; k++) {
-                                totalGain += loopCombinations[i].get(j).get(k).gain + " * ";
-                                totalGainValue -= loopCombinations[i].get(j).get(k).gainValue;
-                            }
-                            totalGain += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gain + ") ";
-                            totalGainValue -= loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gainValue;
                         }
+                        for (int k = 0; k < loopCombinations[i].get(j).size() - 1; k++) {
+                            totalGain += loopCombinations[i].get(j).get(k).gain + " * ";
+                            tmp *= loopCombinations[i].get(j).get(k).gainValue;
+                        }
+                        totalGain += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gain + ") ";
+                        tmp *= loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gainValue;
+                        totalGainValue = tmp*sign;
                     }
                 }
             }
@@ -310,24 +308,22 @@ public class Graph {
             }
             for (int i = 0; i < loopCombinations.length; i++) {
                 for (int j = 0; j < loopCombinations[i].size(); j++) {
+                    int sign = 1;
                     if ((i & 1) == 0) {
                         totalGain += "+ (";
-                        for (int k = 0; k < loopCombinations[i].get(j).size() - 1; k++) {
-                            totalGain += loopCombinations[i].get(j).get(k).gain + " x ";
-                            totalGainValue -= loopCombinations[i].get(j).get(k).gainValue;
-                        }
-                        totalGain += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gain + " ) ";
-                        totalGainValue += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gainValue;
+                        sign = 1;
                     } else {
                         totalGain += "- (";
+                        sign = -1;
                     }
+                    double tmp = 1;
                     for (int k = 0; k < loopCombinations[i].get(j).size() - 1; k++) {
-                        totalGain += loopCombinations[i].get(j).get(k).gain + " x ";
-                        totalGainValue -= loopCombinations[i].get(j).get(k).gainValue;
+                        totalGain += loopCombinations[i].get(j).get(k).gain + " * ";
+                        tmp *= loopCombinations[i].get(j).get(k).gainValue;
                     }
                     totalGain += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gain + " ) ";
-                    totalGainValue += loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gainValue;
-
+                    tmp *= loopCombinations[i].get(j).get(loopCombinations[i].get(j).size() - 1).gainValue;
+                    totalGainValue += tmp*sign;
                 }
             }
             finalValue = "( " +finalValue +" )/(" + totalGain +")";
@@ -347,15 +343,18 @@ public class Graph {
 
 
     public boolean addEdge(Vertex source, Vertex destination, String weight) {
-        for(int i = 0 ; i < source.edges.size() ; i++){
+
+        Edge e = new Edge();
+        try {
+            for(int i = 0 ; i < source.edges.size() ; i++){
             if(source.edges.get(i).destination == destination) {
                 source.edges.get(i).weight = "(" + source.edges.get(i).weight + "+" +weight+")";
+                source.edges.get(i).weightValue += Double.parseDouble(weight);
+
                 return true;
             }
-        }
-        Edge e = new Edge();
-        e.weight = weight;
-        try {
+            }
+            e.weight = weight;
             e.weightValue = Double.parseDouble(weight);
         } catch (Exception x){
             throw new RuntimeException("not numeric");
