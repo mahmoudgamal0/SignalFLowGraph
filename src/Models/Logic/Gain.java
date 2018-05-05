@@ -1,6 +1,6 @@
 package Models.Logic;
 
 public class Gain {
-    String gain;
-    double gainValue;
+    public String gain;
+    public double gainValue;
 }
