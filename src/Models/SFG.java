@@ -4,6 +4,7 @@ import Models.Logic.Graph;
 import Models.Logic.Loop;
 import Models.Logic.Path;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.DoubleAccumulator;
 
 public class SFG {
 
@@ -50,7 +51,7 @@ public class SFG {
         for(int i = 0 ; i < paths.size() ; i++)
         {
             String path = "Path #" + Integer.toString(i+1) + "\n" +
-                        "\t Gain= " + paths.get(i).gain + "\n";
+                        "\t Gain= " + Double.toString(paths.get(i).gainValue) + "\n";
             path += "\t Vertices= ";
             for (int j = 0 ; j < paths.get(i).vertices.size(); j++)
                 path += paths.get(i).vertices.get(j).name + " ";
@@ -73,7 +74,7 @@ public class SFG {
         for(int i = 0 ; i < loops.size() ; i++)
         {
             String loop = "Loop #" + Integer.toString(i+1)  + "\n" +
-                    "\t Gain= " + loops.get(i).gain + "\n";
+                    "\t Gain= " + Double.toString(loops.get(i).gainValue) + "\n";
             loop += "\t Vertices: ";
             for (int j = 0 ; j < loops.get(i).vertices.size(); j++)
                 loop += loops.get(i).vertices.get(j).name + " ";
