@@ -7,6 +7,7 @@ public class Loop {
 
     public ArrayList<Vertex> vertices = new ArrayList<>();
     HashMap<String,Integer> verticesName = new HashMap<>();
-    String gain;
+    public String gain;
+    public Double gainValue;
     int loopID;
 }
