@@ -92,53 +92,59 @@ public class Controller{
     private void initButtons() {
 
         this.gain.setOnAction(e->{
-            removeSelectors();
-            this.currentEdge = 0;
-            this.selectedIShape = null;
-            initSelectors("label");
+            if(removeSelectors()) {
+                this.currentEdge = 0;
+                this.selectedIShape = null;
+                initSelectors("label");
+            }
         });
 
         this.gain.setGraphic(new ImageView(new Image("/Views/Images/gain.png")));
 
         this.addNode.setOnAction(e->{
-            removeSelectors();
-            this.selectedIShape = new Circle();
-            this.mode = "add";
-            drawNode();
+            if(removeSelectors()){
+                this.selectedIShape = new Circle();
+                this.mode = "add";
+                drawNode();
+            }
         });
 
         this.addNode.setGraphic(new ImageView(new Image("/Views/Images/plus.png")));
 
         this.addEdge.setOnAction(e->{
-            removeSelectors();
-            this.selectedIShape = new Edge();
-            this.mode = "add";
+            if(removeSelectors()) {
+                this.selectedIShape = new Edge();
+                this.mode = "add";
+            }
         });
 
         this.addEdge.setGraphic(new ImageView(new Image("/Views/Images/plus-edge.png")));
 
         this.deleteNode.setOnAction(e->{
-            removeSelectors();
-            this.selectedIShape = new Circle();
-            this.mode = "remove";
+            if(removeSelectors()){
+                this.selectedIShape = new Circle();
+                this.mode = "remove";
+            }
         });
 
         this.deleteNode.setGraphic(new ImageView(new Image("/Views/Images/minus.png")));
 
         this.removeEdge.setOnAction(e->{
-            removeSelectors();
-            this.selectedIShape = new Edge();
-            this.mode = "remove";
-            this.currentEdge = 0;
-            initSelectors("edge");
+            if(removeSelectors()) {
+                this.selectedIShape = new Edge();
+                this.mode = "remove";
+                this.currentEdge = 0;
+                initSelectors("edge");
+            }
         });
 
         this.removeEdge.setGraphic(new ImageView(new Image("/Views/Images/minus-edge.png")));
 
 
         this.calculate.setOnAction(e->{
-            removeSelectors();
-            calculate();
+            if(removeSelectors()) {
+                calculate();
+            }
         });
 
         this.calculate.setGraphic(new ImageView(new Image("/Views/Images/calculate.png")));
@@ -185,11 +191,19 @@ public class Controller{
         }));
     }
 
-    private void removeSelectors()
+    private boolean removeSelectors()
     {
+        try{
+            checkOpenLabels();
+        } catch (RuntimeException e) {
+            AlertBox.alert("Label Warning", e.getMessage());
+            return false;
+        }
+
         if(this.listView.getItems().contains(this.select))
             this.listView.getItems().removeAll(this.selectorUp,this.select,this.selectorDown);
         deselect();
+        return true;
     }
 
     private void initSelectors(String item) {

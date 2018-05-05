@@ -81,7 +81,15 @@ public class Edge extends javafx.scene.shape.SVGPath implements IShape {
         String controlY2;
 
         double r = Math.sqrt(Math.pow(sx-x,2))/2;
-        if(x > sx)
+        if(x == sx)
+        {
+            controlX1 =Integer.toString((sx - 50/2));
+            controlY1 = Integer.toString((sy - 50));
+            controlX2 = Integer.toString((sx + 50/2));
+            controlY2 = Integer.toString((sy - 50));
+            propertiesMap.put("type",1);
+        }
+        else if(x > sx)
         {
             controlX1 =Integer.toString((int) (sx + r/2));
             controlY1 = Integer.toString((int) (sy - r));
