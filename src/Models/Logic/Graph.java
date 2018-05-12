@@ -85,6 +85,9 @@ public class Graph {
             l.vertices = tmp;
             boolean loopClear = false;
             boolean allClear = true;
+
+            //changed
+
             for(Loop loop : loops){
                 if(loop.vertices.size() == tmp.size()){
                     for(Vertex vertex : tmp) {
@@ -94,12 +97,19 @@ public class Graph {
                     }
                     if (!loopClear){
                         allClear = false;
-                        break;
-                    } else {
-                        loopClear = false;
+                        int pos = loop.vertices.indexOf(tmp.get(0));
+                        for(int q = 0 ; q < tmp.size() ; q++){
+                            if (!tmp.get(q).equals(loop.vertices.get((pos + q)% tmp.size()))) {
+                                allClear = true;
+                            }
+                        }
+                        if(!allClear)
+                            break;
                     }
                 }
             }
+
+
             if(allClear)
                 loops.add(l);
             return;
