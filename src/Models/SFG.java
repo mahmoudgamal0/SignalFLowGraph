@@ -86,6 +86,30 @@ public class SFG {
 
     }
 
+    public ArrayList<String> getDeltas()
+    {
+        String source = this.drawnNodes.get(0).getLabel().getText();
+        String sink = this.drawnNodes.get(this.drawnNodes.size()-1).getLabel().getText();
+        ArrayList<Path> paths = this.graph.getForwardPaths(source,sink);
+
+        int numOfPaths = paths.size();
+
+        ArrayList<String> result = new ArrayList<>();
+
+        result.add("# of Deltas = " + Integer.toString(numOfPaths) + "\n");
+
+        for(int i = 0 ; i < paths.size() ; i++)
+        {
+            String delta = "Delta #" + Integer.toString(i+1) + "\n" +
+                    "\t Gain= " + paths.get(i).delta + "\n" +
+                    "\t     = " + Double.toString(paths.get(i).deltaValue);
+            result.add(delta + "\n\n");
+        }
+
+        result.add("-------------------------------\n");
+        return result;
+    }
+
     public String getGain()
     {
         String source = this.drawnNodes.get(0).getLabel().getText();

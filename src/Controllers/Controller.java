@@ -369,8 +369,9 @@ public class Controller{
 
         ArrayList<String> loops = sfg.getLoops();
         ArrayList<String> paths = sfg.getForwardPaths();
+        ArrayList<String> deltas = sfg.getDeltas();
 
-        FormulateTextData ftd = new FormulateTextData(paths,loops,sfg.getGain());
+        FormulateTextData ftd = new FormulateTextData(paths,loops,deltas,sfg.getGain());
 
         DialogBox.dialog(this.stackPane,new Text("Gain"),ftd.getData());
 
