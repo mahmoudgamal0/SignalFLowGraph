@@ -282,7 +282,7 @@ public class Graph {
                 ArrayList<ArrayList<Loop>>[] loopCombinations = getFormulaLoops(loops);
                 for (int i = 0; i < loops.size(); i++) {
                     totalGain += "- " + "(" + loops.get(i).gain + ") ";
-                    totalGainValue += loops.get(i).gainValue;
+                    totalGainValue -= loops.get(i).gainValue;
                 }
                 for (int i = 0; i < loopCombinations.length; i++) {
                     for (int j = 0; j < loopCombinations[i].size(); j++) {
