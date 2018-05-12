@@ -263,6 +263,9 @@ public class Graph {
     public Gain evaluateGain(String v, String u) {
 
         ArrayList<Path> paths = getForwardPaths(v, u);
+        ArrayList<String> delta = new ArrayList<>();
+        ArrayList<Double> deltaValues = new ArrayList<>();
+
         String finalValue = "";
         double finalGainValue = 0;
 
@@ -278,8 +281,9 @@ public class Graph {
                     }
                 }
             }
+            ArrayList<ArrayList<Loop>>[] loopCombinations ;
             if(loops.size() !=0) {
-                ArrayList<ArrayList<Loop>>[] loopCombinations = getFormulaLoops(loops);
+                loopCombinations = getFormulaLoops(loops);
                 for (int i = 0; i < loops.size(); i++) {
                     totalGain += "- " + "(" + loops.get(i).gain + ") ";
                     totalGainValue -= loops.get(i).gainValue;
@@ -306,8 +310,10 @@ public class Graph {
             }
             if(finalValue.length() != 0)
                 finalValue += " + ";
-                finalValue += "(" + path.gain +")*(" +totalGain+")";
-                finalGainValue += path.gainValue*totalGainValue;
+            finalValue += "(" + path.gain +")*(" +totalGain+")";
+            finalGainValue += path.gainValue*totalGainValue;
+            delta.add("(" +totalGain+")");
+            deltaValues.add(totalGainValue);
             }
             String totalGain="1 ";
             double totalGainValue = 1;
@@ -345,6 +351,9 @@ public class Graph {
             }
             Gain gain = new Gain();
             gain.gain = finalValue;
+            gain.delta = delta;
+            gain.deltaValues = deltaValues;
+            gain.loopCombinations = loopCombinations ;
             gain.gainValue = finalGainValue;
         return gain;
     }
