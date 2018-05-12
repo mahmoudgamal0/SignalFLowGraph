@@ -114,7 +114,7 @@ public class ShapeTracker {
     public IShape getNearest(Point point) {
 
         if(drawnCircles.size() == 0)
-            throw new RuntimeException("Display an error message of no nodes");
+            throw new RuntimeException("There are no NODES !!!");
         int minX = (int)((Circle)drawnCircles.get(0)).getLayoutX();
         int minY = (int)((Circle)drawnCircles.get(0)).getLayoutY();
         int minProp = 0;

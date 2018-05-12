@@ -228,12 +228,14 @@ public class Controller{
         this.select.setOnAction(e->{
             try{
                 checkOpenLabels();
+                if(this.drawnEdges.isEmpty())
+                    throw new RuntimeException("No edges exist");
                 if(item.equals("edge"))
                     this.drawer.removeEdge(this.pane,this.currentEdge);
                 else
                     showText((Edge) this.drawnEdges.get(this.currentEdge));
             } catch (RuntimeException ex) {
-                AlertBox.alert("Label Warning",ex.getMessage());
+                AlertBox.alert("Selection Warning",ex.getMessage());
             }
         });
 
