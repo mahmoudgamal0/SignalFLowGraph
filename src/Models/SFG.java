@@ -1,5 +1,6 @@
 package Models;
 
+import Models.Logic.Gain;
 import Models.Logic.Graph;
 import Models.Logic.Loop;
 import Models.Logic.Path;
@@ -11,6 +12,9 @@ public class SFG {
 
     private ArrayList<IShape> drawnNodes;
     private ArrayList<IShape> drawnEdges;
+    private ArrayList<Path> paths;
+    private ArrayList<Loop> loops;
+    private ArrayList<ArrayList<Loop>>[] loopsCombinations;
     private Graph graph;
 
     public SFG(ArrayList<IShape> drawnNodes, ArrayList<IShape> drawnEdges)
@@ -38,10 +42,6 @@ public class SFG {
 
     public ArrayList<String> getForwardPaths()
     {
-        String source = this.drawnNodes.get(0).getLabel().getText();
-        String sink = this.drawnNodes.get(this.drawnNodes.size()-1).getLabel().getText();
-        ArrayList<Path> paths = this.graph.getForwardPaths(source,sink);
-
         int numOfPaths = paths.size();
 
         ArrayList<String> result = new ArrayList<>();
@@ -64,7 +64,16 @@ public class SFG {
 
     public ArrayList<String> getLoops()
     {
-        ArrayList<Loop> loops = this.graph.getLoops();
+        ArrayList<String> result = new ArrayList<>();
+        result.add("Individual Loops: \n");
+        result.addAll(getLoops(this.loops));
+        result.addAll(getLoopsCombinations());
+        return result;
+    }
+
+    private ArrayList<String> getLoops(ArrayList<Loop> loops)
+    {
+
         int numOfLoops = loops.size();
 
         ArrayList<String> result = new ArrayList<>();
@@ -86,11 +95,27 @@ public class SFG {
 
     }
 
+    private ArrayList<String> getLoopsCombinations()
+    {
+        int numOfCombinations = loopsCombinations.length;
+        ArrayList<String> result = new ArrayList<>();
+        for(int i = 0 ; i < numOfCombinations ; i++)
+        {
+            ArrayList<ArrayList<Loop>> ithCombination = loopsCombinations[i];
+
+            result.add("Combination #" + Integer.toString(i + 2) + " :\n");
+            for(int j = 0 ; j < ithCombination.size() ; j++)
+            {
+                result.add("Set #" + Integer.toString(j+1) + " :\n");
+                ArrayList<String> ithCombinationJthLoop = getLoops(ithCombination.get(j));
+                result.addAll(ithCombinationJthLoop);
+            }
+        }
+        return result;
+    }
+
     public ArrayList<String> getDeltas()
     {
-        String source = this.drawnNodes.get(0).getLabel().getText();
-        String sink = this.drawnNodes.get(this.drawnNodes.size()-1).getLabel().getText();
-        ArrayList<Path> paths = this.graph.getForwardPaths(source,sink);
 
         int numOfPaths = paths.size();
 
@@ -114,6 +139,10 @@ public class SFG {
     {
         String source = this.drawnNodes.get(0).getLabel().getText();
         String sink = this.drawnNodes.get(this.drawnNodes.size()-1).getLabel().getText();
-        return "\t Gain= " + this.graph.evaluateGain(source,sink).gain+ "\n" + Double.toString(this.graph.evaluateGain(source,sink).gainValue);
+        Gain gain = this.graph.evaluateGain(source,sink);
+        this.paths = gain.paths;
+        this.loopsCombinations = gain.loopCombinations;
+        this.loops = this.graph.getLoops();
+        return "\t Gain= " + gain.gain+ "\n" + "\t    =" + Double.toString(gain.gainValue);
     }
 }

@@ -367,13 +367,14 @@ public class Controller{
         SFG sfg = new SFG(this.drawnNodes,this.drawnEdges);
         sfg.assembleGraph();
 
+        String gain = sfg.getGain();
         ArrayList<String> loops = sfg.getLoops();
         ArrayList<String> paths = sfg.getForwardPaths();
         ArrayList<String> deltas = sfg.getDeltas();
 
-        FormulateTextData ftd = new FormulateTextData(paths,loops,deltas,sfg.getGain());
+        FormulateTextData ftd = new FormulateTextData(paths,loops,deltas,gain);
 
-        DialogBox.dialog(this.stackPane,new Text("Gain"),ftd.getData());
+        DialogBox.dialog(this.stackPane,new Text("Gain Calculations"),ftd.getData());
 
     }
 
