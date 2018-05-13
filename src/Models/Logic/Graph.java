@@ -89,6 +89,8 @@ public class Graph {
             //changed
 
             for(Loop loop : loops){
+                loopClear = false;
+                allClear = true;
                 if(loop.vertices.size() == tmp.size()){
                     for(Vertex vertex : tmp) {
                         if(!loop.verticesName.containsKey(vertex.name)){
