@@ -367,7 +367,13 @@ public class Controller{
             return;
         }
         SFG sfg = new SFG(this.drawnNodes,this.drawnEdges);
-        sfg.assembleGraph();
+
+        try{
+            sfg.assembleGraph();
+        } catch (RuntimeException e){
+            AlertBox.alert("Calculation Error", e.getMessage());
+            return;
+        }
 
         String gain = sfg.getGain();
         ArrayList<String> loops = sfg.getLoops();

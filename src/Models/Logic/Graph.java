@@ -375,7 +375,7 @@ public class Graph {
             e.weight = weight;
             e.weightValue = Double.parseDouble(weight);
         } catch (Exception x){
-            throw new RuntimeException("not numeric");
+            throw new RuntimeException("None Numeric Entry");
         }
         e.source = source;
         e.destination = destination;
